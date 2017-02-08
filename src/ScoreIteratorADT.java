@@ -1,4 +1,4 @@
 
-public class ScoreIteratorADT {
+public interface ScoreIteratorADT {
 
 }
