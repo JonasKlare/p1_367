@@ -85,16 +85,17 @@ public class GradeEstimator {
 	 * @param curr: a string that contains letter grades.
 	 * @return an array of characters with letters
 	 */
-	private static char[] getLetterGrades  (String curr) 
+	private static char[] getLetterGrades (String curr) 
 	{
 		//Variables
 		int size;
+		char[] letterGrades;
 		//Variables
 		
 		//Body
 		curr = removeWhitespace(curr);
 		size = curr.length();
-		char[] letterGrades = new char[size];
+		letterGrades = new char[size];
 		for(int i = 0; i < size; i++) //Go through each space. 
 		{
 			letterGrades[i] = curr.charAt(i); //LetterGrades populated with info from file
@@ -104,7 +105,32 @@ public class GradeEstimator {
 		//Return
 		return letterGrades;
 	}
-	
+	/**
+	 * Return a double array that contains a list of minimum thresholds,
+	 * by deleting whitespace and then looking through the String.
+	 * @param curr: a string that contains the thresholds of grades
+	 * @return an array of doubles with minimum thresholds. 
+	 */
+	public static double[] getThresholds(String curr)
+	{
+		//Variables
+		int size;
+		double[] minThresholds;
+		//Variables
+		
+		//Body
+		curr = removeWhitespace(curr);
+		size = curr.length();
+		minThresholds = new double[size];
+		for(int i = 0; i < size; i++)
+		{
+			minThresholds[i] = (double) curr.charAt(i);
+		}	
+		//Body
+		
+		//Return
+		return minThresholds;
+	}
 	/**
 	 * Tests to see if the method "getLetterGrades" works.
 	 * PRECONDITIONS: N/a
@@ -118,12 +144,10 @@ public class GradeEstimator {
 		
 		
 		no1 = getLetterGrades(grades1);
-		System.out.println("[0]: " + no1[0] + " [1]:" + no1[1] + "[2]:" + no1[2]);
+		System.out.println("[0]: " + no1[0] + "[1]: " + no1[1] + "[2]: " + no1[2]);
 		
 		no2 = getLetterGrades(grades2);
-		System.out.println("[0]: " + no2[0] + " [1]:" + no2[1] + "[2]:" + no2[2]);
-		
-		
+		System.out.println("[0]: " + no2[0] + "[1]: " + no2[1] + "[2]: " + no2[2]);
 	}
 	/**
 	 * Construct a string from the object and return a report for the user.
