@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -151,8 +152,8 @@ public class GradeEstimator {
 	}
 	/**
 	 * Construct a string from the object and return a report for the user.
-	 * PRECONDITIONS:
-	 * POSTCONDITIONS:
+	 * PRECONDITIONS:Given file names
+	 * POSTCONDITIONS:Report printed and returned
 	 * @return a report in the format:
 	 * %name \t %Score \n
 	 * ....
@@ -166,10 +167,73 @@ public class GradeEstimator {
 	 */
 	/**
 	 * @author Zexing Li (Richard)
-	 * @return
+	 * @return EstimateReport
+	 * @throws GradeFileFormatException 
+	 * @throws FileNotFoundException 
 	 */
-	public String getEstimateReport()
+	public String getEstimateReport() throws FileNotFoundException, GradeFileFormatException
 	{
+		String gradeinfo = "Input";
+		GradeEstimator ge = GradeEstimator.createGradeEstimatorFromFile(gradeinfo);   
+		String output = "";                                     //storage ready-to-print info in output 
+		int n = ge.categories.length;                           //n is the amount of categories
+		double[] cat_sorted_sum = new double[ge.categories.length];
+		int[] cat_sorted_count = new int[ge.categories.length];
+		for(int i = 0;i < ge.scoreList.size();i++) 
+		{
+			output += ge.scoreList.get(i).getName() + "\t";
+			output += ge.scoreList.get(i).getPercent() + "\n";
+			for(int j = 0;j < ge.categories.length;j++)
+			{
+				if(ge.categories[j].startsWith(ge.scoreList.get(i).getCategory()))
+				{
+					cat_sorted_sum[j] += ge.scoreList.get(i).getPercent();
+					cat_sorted_count[j]++;
+				}
+			}
+		}
+
+		output += "Grade estimate is based on 8 scores\n";
+		int average = 0;
+		for(int i = 0;i < ge.categories.length;i++)
+		{
+			output += "  " + (cat_sorted_sum[i]/cat_sorted_count[i])*(ge.weights[i]/100) + "%  = " + (cat_sorted_sum[i]/cat_sorted_count[i]) + "% of" + ge.weights[i]/100 + "% for" + ge.categories[i] +"\n";
+		    average += cat_sorted_sum[i]/cat_sorted_count[i];
+		}
+		output += "--------------------------------\n";
+		output += average;
+		File file = new File("Output.txt");
+		try {
+			file.createNewFile();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		FileWriter writer;
+		try {
+			writer = new FileWriter(file);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			writer.write(output);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			writer.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return null;
 	}
 	/**
