@@ -209,7 +209,7 @@ public class GradeEstimator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		FileWriter writer;
+		FileWriter writer = null;
 		try {
 			writer = new FileWriter(file);
 		} catch (IOException e) {
@@ -234,7 +234,7 @@ public class GradeEstimator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
+		return output;
 	}
 	/**
 	 * Remove the whitespace from an input. 
@@ -265,10 +265,9 @@ public class GradeEstimator {
 		return blackspaceString;
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FileNotFoundException, GradeFileFormatException  {
 		
 		testGetLetterGrades();
-		
 		
 	}
 
