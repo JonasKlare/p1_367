@@ -26,7 +26,8 @@ public class GradeEstimator {
 	}
 	//Constructors
 	
-	private static GradeEstimator checkInput(String[] args) throws FileNotFoundException, GradeFileFormatException //Change this around.
+	private static GradeEstimator checkInput(String[] args) 
+			throws FileNotFoundException, GradeFileFormatException //Change this around.
 	{
 		//Variables
 		String input;
@@ -65,7 +66,7 @@ public class GradeEstimator {
 		String currString = "";
 		int size, counter = 0;
 		char[] letterGrades;
-		double[] minThresholds, assignmentValue_;
+		double[] minThresholds, tempAssignmentValue;
 		int[] assignmentValue;
 		String[] names, categories;
 		boolean nextScore = true;
@@ -83,6 +84,10 @@ public class GradeEstimator {
 			
 			//Check to see if these contain the same # of elements
 			//If not throw exception.
+			if (letterGrades.length != minThresholds.length)
+			{
+				throw new GradeFileFormatException();
+			}
 			
 			currString = bufferO.readLine(); //Third String
 			names = getNames(currString);
@@ -91,11 +96,18 @@ public class GradeEstimator {
 			categories = createCategories(names);
 			
 			currString = bufferO.readLine(); //Value of each assignment
-			assignmentValue_ = getThresholds(currString);
-			assignmentValue = new int[assignmentValue_.length];
+			tempAssignmentValue = getThresholds(currString);
+			
+			// Check that categories and values are same amount
+			if (categories.length != tempAssignmentValue.length)
+			{
+				throw new GradeFileFormatException();
+			}
+			
+			assignmentValue = new int[tempAssignmentValue.length];
 			for(int i = 0; i < assignmentValue.length; i++)
 			{
-				assignmentValue[i] = (int) assignmentValue_[i]; 
+				assignmentValue[i] = (int) tempAssignmentValue[i]; 
 			}
 			
 			scoreList = new ScoreList();
@@ -138,7 +150,7 @@ public class GradeEstimator {
 	private static String[] createCategories(String[] names)
 	{
 		//Variables
-		String[] categories = null;
+		String[] categories;
 		//Variables
 		
 		//Body
