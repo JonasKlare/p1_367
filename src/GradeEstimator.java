@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -13,6 +12,7 @@ public class GradeEstimator {
 	private String[] categories;
 	private double[] minThreshold;
 	private char[] letterGrades;
+	private static final int SCORE_PARAMS = 3; //There are only 3 score params.
 	
 	//Constructors
 	public GradeEstimator(ScoreList scoreList, int[] weights, 
@@ -26,11 +26,12 @@ public class GradeEstimator {
 	}
 	//Constructors
 	
-	private void checkInput(String[] args) throws FileNotFoundException, GradeFileFormatException //Change this around.
+	private static GradeEstimator checkInput(String[] args) throws FileNotFoundException, GradeFileFormatException //Change this around.
 	{
 		//Variables
 		String input;
 		Scanner in = new Scanner(System.in);
+		GradeEstimator ge = null;
 		//Variables
 		
 		//Body
@@ -40,9 +41,10 @@ public class GradeEstimator {
 		}
 		else
 		{
-			createGradeEstimatorFromFile( args[0] );
+			ge = createGradeEstimatorFromFile( args[0] );	
 		}
 		//Body
+		return ge;
 	}
 	
 	/**
@@ -63,6 +65,12 @@ public class GradeEstimator {
 		String currString = "";
 		int size, counter = 0;
 		char[] letterGrades;
+		double[] minThresholds, assignmentValue_;
+		int[] assignmentValue;
+		String[] names, categories;
+		boolean nextScore = true;
+		GradeEstimator newGrade;
+		ScoreList scoreList;
 		//Variables
 		
 		//Body
@@ -70,15 +78,261 @@ public class GradeEstimator {
 			currString = bufferO.readLine(); //Get first String
 			letterGrades = getLetterGrades(currString);
 			
+			currString = bufferO.readLine(); //Second string
+			minThresholds = getThresholds(currString);
+			
+			//Check to see if these contain the same # of elements
+			//If not throw exception.
+			
+			currString = bufferO.readLine(); //Third String
+			names = getNames(currString);
+			
+			//Create the category from the scores. 
+			categories = createCategories(names);
+			
+			currString = bufferO.readLine(); //Value of each assignment
+			assignmentValue_ = getThresholds(currString);
+			assignmentValue = new int[assignmentValue_.length];
+			for(int i = 0; i < assignmentValue.length; i++)
+			{
+				assignmentValue[i] = (int) assignmentValue_[i]; 
+			}
+			
+			scoreList = new ScoreList();
+			
+			while(nextScore == true)
+			{
+				currString = bufferO.readLine();
+				//System.out.println(currString + " | line 108");
+				
+				if(currString == (null))
+				{
+					nextScore = false;
+				}
+				else
+				{
+					scoreList.add(getScore(currString));
+					//System.out.println(getScore(currString).toString());
+				}
+			}
+			
+			
 		} 
 		catch (IOException e) 
 		{
-			e.printStackTrace();
+			throw new GradeFileFormatException();
+		}
+		
+		
+		//Create the object.
+		newGrade = new GradeEstimator(scoreList, assignmentValue, categories, minThresholds, letterGrades);
+//		System.out.println(scoreList + "\n" + assignmentValue + "\n" + categories + "\n" + minThresholds + "\n" + letterGrades);
+//		System.out.println(newGrade);
+//		newGrade.read();
+		//Body
+		
+		//Return
+		return newGrade;
+	}
+	
+	private static String[] createCategories(String[] names)
+	{
+		//Variables
+		String[] categories = null;
+		//Variables
+		
+		//Body
+		categories = new String[names.length];
+		for(int i = 0; i < names.length; i++)
+		{
+			categories[i] = names[i].charAt(i) + "";
 		}
 		//Body
 		
 		//Return
-		return null;
+		return categories;
+	}
+	private static Score getScore(String curr) throws GradeFileFormatException
+	{
+		//Variables
+		Score newScore = null;
+		int counter = 0;
+		String[] scoreFields = new String[SCORE_PARAMS];
+		double pointsEarned, maxPoints;
+		//Variables
+		
+		//Body
+		
+		//STEP 1. Find all of the variables in the string.
+		for(int i = 0; i < SCORE_PARAMS; i++)
+		{
+			scoreFields[i] = "";
+			
+			//Set the check condition for curr length first, so then it won't do the next if it fails.
+			while(counter <= (curr.length() - 1) && (!Character.isWhitespace(curr.charAt(counter))) )
+			{
+				
+				scoreFields[i] += curr.charAt(counter);
+				counter++;
+			}
+			
+			//System.out.println(scoreFields[i]); //TEST
+			counter++;
+		}
+		
+		//Step 2. Parse out all of the doubles. 
+		try
+		{
+		pointsEarned = Double.parseDouble(scoreFields[1]);
+		maxPoints = Double.parseDouble(scoreFields[2]);
+		} catch(NumberFormatException e)
+		{
+			throw new GradeFileFormatException();
+		}
+		//Step 3. Achieve nirvana and create the score. 
+		newScore = new Score(scoreFields[0], pointsEarned, maxPoints);
+		//Body
+		
+		//Return
+		return newScore;
+	
+	}
+	
+	private static void testGetScore()
+	{
+		String[] testers = {"a1 30 50", "a2 12.5 15", "a3 0 20"};
+		
+		for(int i = 0; i < testers.length; i++)
+		{
+			try {
+				getScore(testers[i]);
+			} catch (GradeFileFormatException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	/**
+	 * Separate the current string out into each individual name of the grade
+	 * by whitespace. 
+	 * PRECONDITIONS: curr contains each element separated by exactly one space. 
+	 * @param curr: A string containing names, separated by whitespace
+	 * @return an array of strings of each category name.
+	 */
+	private static String[] getNames(String curr)
+	{
+		//Variables
+		String[] names;
+		String name = "";
+		int size, counter = 0;
+		//Variables
+		
+		//Body
+		size = countWhitespace(curr); //This will be the maxsize of the string[]
+		names = new String[size];
+		
+		//Deconstruct the string into parts based upon spaces. 
+		//We allow for multiple whitespaces between each one. 
+		//The size of names will be the amount of whitespace
+		//So we can gather more information. 
+		while(curr.length() > 0)
+		{
+			
+			if(!Character.isWhitespace(curr.charAt(0)))
+			{
+				name += curr.charAt(0);
+				curr = curr.substring(1); //Cut off the first letter and continue
+			}
+			
+			else //The character is whitespace.
+			{
+				if(!name.equals("")) //Check to see if we have something to add. 
+				{
+					System.out.println("THIS IS NAME: " + name + " :Counter" );
+					names[counter] = name;
+					counter++;
+				}
+				name = ""; //Set name back to a blank state.
+				
+				curr = curr.substring(1); //Take out the whitespace. 
+			}
+		}
+		//TODO use counter to create a new array then set current array to that if
+		//length becomes a problem.
+		//Body
+		
+		//Return
+		return names;
+	}
+	
+	private static void testGetNames()
+	{
+		//Variables
+		String[] names = {"ALPHA BETA GAMMA KAPPA", "OMEGA RUBY  SAPPHIRE   EMERALD  ", " HI  EK SO  OE W "};
+		//Variables
+		
+		//Body
+		for(int i = 0; i < names.length; i++)
+		{			
+			getNames(names[i]);
+		}
+		//Body
+	}
+	/**
+	 * Return a double array that contains a list of minimum thresholds,
+	 * by deleting whitespace and then looking through the String.
+	 * @param curr: a string that contains the thresholds of grades
+	 * @return an array of doubles with minimum thresholds. 
+	 * @throws GradeFileFormatException 
+	 */
+	private static double[] getThresholds(String curr) throws GradeFileFormatException 
+	{
+		//Variables
+		int size, counter = 0, nextSpace;
+		double[] minThresholds = null;
+		String minThreshold_;
+		//Variables
+		
+		//Body
+		curr += " "; //Add a space at the end of the string for counting. 
+		size = countWhitespace(curr); //Count how many whitespaces there are (max Size)
+		minThresholds = new double[size]; //Initialize the array with the max number. 
+		
+		while(curr.length() > 0)
+		{
+			nextSpace = curr.indexOf(' '); //Find where spaces are. 
+			
+			if(nextSpace != -1) //Nextspace returns -1 if there are no more. 
+			{
+				minThreshold_ = curr.substring(0, nextSpace); 
+				
+				try
+				{
+					minThresholds[counter] = Double.parseDouble(minThreshold_);
+				}
+				catch(NumberFormatException e)
+				{
+					throw new GradeFileFormatException();
+				}
+				
+				counter++; //Add one to the counter. 
+				curr = curr.substring(nextSpace + 1); //Reduce the size of the string. 
+				//System.out.println(minThreshold_ + " <-- minThreshold, curr --> " + curr); //TESTER
+			}
+		}
+		//Body
+		
+		//Return
+		return minThresholds;
+	}
+	private static void testGetThresholds()
+	{
+		String tester = "90.3 49.2 48.1";
+		
+		try {
+			getThresholds(tester);
+		} catch (GradeFileFormatException e) {
+			e.printStackTrace();
+		}
 	}
 	/**
 	 * Return a character array that contains what the possible letter grades are.
@@ -107,32 +361,6 @@ public class GradeEstimator {
 		return letterGrades;
 	}
 	/**
-	 * Return a double array that contains a list of minimum thresholds,
-	 * by deleting whitespace and then looking through the String.
-	 * @param curr: a string that contains the thresholds of grades
-	 * @return an array of doubles with minimum thresholds. 
-	 */
-	public static double[] getThresholds(String curr)
-	{
-		//Variables
-		int size;
-		double[] minThresholds;
-		//Variables
-		
-		//Body
-		curr = removeWhitespace(curr);
-		size = curr.length();
-		minThresholds = new double[size];
-		for(int i = 0; i < size; i++)
-		{
-			minThresholds[i] = (double) curr.charAt(i);
-		}	
-		//Body
-		
-		//Return
-		return minThresholds;
-	}
-	/**
 	 * Tests to see if the method "getLetterGrades" works.
 	 * PRECONDITIONS: N/a
 	 * POSTCONDITIONS: N/a
@@ -152,8 +380,8 @@ public class GradeEstimator {
 	}
 	/**
 	 * Construct a string from the object and return a report for the user.
-	 * PRECONDITIONS:Given file names
-	 * POSTCONDITIONS:Report printed and returned
+	 * PRECONDITIONS:
+	 * POSTCONDITIONS:
 	 * @return a report in the format:
 	 * %name \t %Score \n
 	 * ....
@@ -167,9 +395,7 @@ public class GradeEstimator {
 	 */
 	/**
 	 * @author Zexing Li (Richard)
-	 * @return EstimateReport
-	 * @throws GradeFileFormatException 
-	 * @throws FileNotFoundException 
+	 * @return
 	 */
 	public String getEstimateReport() throws FileNotFoundException, GradeFileFormatException
 	{
@@ -245,10 +471,123 @@ public class GradeEstimator {
 		return blackspaceString;
 	}
 	
-	public static void main(String[] args) throws FileNotFoundException, GradeFileFormatException  {
+	/**
+	 * Counts the amount of whitespace in a given string. 
+	 * @param input: A string that we want to figure out how much
+	 * 		whitespace exists in it. 
+	 * @return the number of whitespaces in the text above. 
+	 */
+	private static int countWhitespace(String input)
+	{
+		//Variables
+		int count = 0;
+		//Variables
 		
-		testGetLetterGrades();
+		//Body
+		for(int i = 0; i < input.length(); i++)
+		{
+			if(Character.isWhitespace(input.charAt(i)))
+			{
+				count++;
+			}
+		}
+		//Body
 		
+		//Return
+		return count;
+	}
+	
+	private String read()
+	{
+		//Variables
+		String output = "", newString ="";
+		//Variables
+		
+		//Body
+		System.out.println("LINE 467");
+		for(int i = 0; i < this.scoreList.size(); i++)
+		{
+			if(scoreList.get(i)==null)
+			{
+				//Do nothing
+			}
+			else
+			{
+				newString += "[" + (i+1) + "]: " + scoreList.get(i).toString() + " ";
+			}
+		}
+		output += newString + "\n";
+		
+		newString = "WEIGHTS";
+		for(int i = 0; i < this.weights.length; i++)
+		{
+			newString += "[" + (i+1) + "]: " + weights[i] + " ";
+		}
+		output += newString + "\n";
+		
+		newString = "CATEGORIES";
+		for(int i = 0; i < this.categories.length; i++)
+		{
+			newString += "[" + (i+1) + "]: " + categories[i] + " ";
+		}
+		output += newString + "\n";
+		
+		newString = "MINTHRESHOLDS";
+		for(int i = 0; i < this.minThreshold.length; i++)
+		{
+			newString += "[" + (i+1) + "]: " + minThreshold[i] + " ";
+		}
+		output += newString + "\n";
+		
+		newString = "LETTERGRADES";
+		for(int i = 0; i < this.letterGrades.length; i++)
+		{
+			newString += "[" + (i+1) + "]: " + letterGrades[i] + " ";
+		}
+		output += newString + "\n";
+		
+				
+		//Body
+		
+		//Return
+		return output;
+	}
+	private static <E> String readArray(E[] data)
+	{
+		//Variables
+		String newString = "";
+		//Variables
+		
+		//Body
+		for(int i = 0; i < data.length; i++)
+		{
+			if(data==null)
+			{
+				//Do nothing
+			}
+			else
+			{
+				newString += "[" + (i+1) + "]: " + data[i].toString() + " ";
+			}
+		}
+		//Body
+		
+		//Return
+		return newString;
+	}
+	public static void main(String[] args) {
+		
+		//testGetLetterGrades();
+		//testGetNames();
+		//testGetScore();
+		//testGetThresholds();
+		try {
+			GradeEstimator ge = checkInput(args);
+			System.out.println(ge.read());
+		} catch (FileNotFoundException | GradeFileFormatException e) {
+			// 
+			e.printStackTrace();
+		}
 	}
 
 }
