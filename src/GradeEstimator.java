@@ -291,7 +291,6 @@ public class GradeEstimator {
 			{
 				if(!name.equals("")) //Check to see if we have something to add. 
 				{
-					System.out.println("THIS IS NAME: " + name + " :Counter" );
 					names[counter] = name;
 					counter++;
 				}
@@ -477,7 +476,8 @@ public class GradeEstimator {
 		for (int i = 0; i < categories.length; i++)
 		{
 			ScoreIterator itr = new ScoreIterator(scoreList, categories[i]);
-			while (itr.hasNext()) {
+			while (itr.hasNext()) 
+			{
 				Score temp = itr.next();
 				score = temp.getPoints();
 				max = temp.getMaxPossible();
@@ -669,7 +669,7 @@ public class GradeEstimator {
 		
 		try {
 			GradeEstimator ge = checkInput(args);
-			System.out.println(ge.read());
+			System.out.println(ge.getEstimateReport());
 		} catch (FileNotFoundException | GradeFileFormatException e) { 
 			e.printStackTrace();
 		}

@@ -18,7 +18,7 @@ public class ScoreIterator implements ScoreIteratorADT {
 	}
 	//Constructors
 	
-	/*
+	/**
 	 * Gets the current position and advances the current position
 	 * to next.
 	 * 
@@ -38,15 +38,30 @@ public class ScoreIterator implements ScoreIteratorADT {
 		return result;		
 	}
 	
-	/*
+	/**
 	 * Checks to see if there is another score in the list and check if the
 	 * next score is in the same category.
 	 * 
 	 * @see ScoreIteratorADT#next()
 	 */
 	public boolean hasNext() {
-		return (currPos < myList.size() || 
-				myList.get(currPos).getCategory() != category);
+		//Variables
+		boolean m = false, n = false;
+		//Variables
+		
+		//Body
+		if(currPos < myList.size())
+			m = true;
+		
+		//If m isn't true, then we will get an OOB error. 
+		if(m && myList.get(currPos).getCategory() != category)
+		{
+			n = true;
+		}
+		//Body
+		
+		//Return 
+		return (n); //If n is true, m is also true.
 	}
 	
 }
