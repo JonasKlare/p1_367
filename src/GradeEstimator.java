@@ -7,12 +7,14 @@ import java.util.Scanner;
 
 public class GradeEstimator {
 	
-	private ScoreList scoreList;
-	private int[] weights;
-	private String[] categories;
-	private double[] minThreshold;
-	private char[] letterGrades;
+	//Variables
+	private ScoreList scoreList; //The list of all the input scores to the estimator.
+	private String[] categories; //Different categories avaliable. 
+	private int[] weights; //The weights of each category
+	private char[] letterGrades; //Letter grades in descending order
+	private double[] minThreshold; //The minimum threshold for each letter grade
 	private static final int SCORE_PARAMS = 3; //There are only 3 score params.
+	//Variables
 	
 	//Constructors
 	public GradeEstimator(ScoreList scoreList, int[] weights, 
@@ -26,6 +28,19 @@ public class GradeEstimator {
 	}
 	//Constructors
 	
+	//Methods
+	/**
+	 * A file to check and see if the users input is acceptable for reading. If it is
+	 * The program will then take the information from the args and use it to construct
+	 * a GradeEstimator object. 
+	 * 
+	 * @param args The arguments that are supplied in the main class. 
+	 * @return null if the format is bad, but also returns a message.  
+	 * 		   A fully formed GradeEstimator object if the args are in the correct format. 
+	 * @throws FileNotFoundException: If the file doesn't exist then it will throw this exception. 
+	 * @throws GradeFileFormatException: If the file doesn't contain the correct format for creating
+	 * 					an object. 
+	 */
 	private static GradeEstimator checkInput(String[] args) throws FileNotFoundException, GradeFileFormatException //Change this around.
 	{
 		//Variables
@@ -38,6 +53,7 @@ public class GradeEstimator {
 		if(args.length > 1 || args.length == 0)
 		{
 			System.out.println(Config.USAGE_MESSAGE);
+			//TODO is a gradeFileFormatException here?
 		}
 		else
 		{
@@ -46,7 +62,6 @@ public class GradeEstimator {
 		//Body
 		return ge;
 	}
-	
 	/**
 	 * @author Jonas (I can finish this)
 	 * Take a file and convert the information there into an object.
@@ -82,7 +97,10 @@ public class GradeEstimator {
 			minThresholds = getThresholds(currString);
 			
 			//Check to see if these contain the same # of elements
-			//If not throw exception.
+			if(minThresholds.length != letterGrades.length)
+			{
+				throw new GradeFileFormatException(); //These are paired. 
+			}
 			
 			currString = bufferO.readLine(); //Third String
 			names = getNames(currString);
@@ -115,26 +133,27 @@ public class GradeEstimator {
 					//System.out.println(getScore(currString).toString());
 				}
 			}
-			
-			
 		} 
 		catch (IOException e) 
 		{
 			throw new GradeFileFormatException();
 		}
 		
-		
 		//Create the object.
 		newGrade = new GradeEstimator(scoreList, assignmentValue, categories, minThresholds, letterGrades);
-//		System.out.println(scoreList + "\n" + assignmentValue + "\n" + categories + "\n" + minThresholds + "\n" + letterGrades);
-//		System.out.println(newGrade);
-//		newGrade.read();
 		//Body
 		
 		//Return
 		return newGrade;
 	}
-	
+	/**
+	 * Creates categories based upon the string[] names provided in args. 
+	 * This will take the first letter of each of them and make the category
+	 * out of that. 
+	 * 
+	 * @param names: The string of names provided from args. 
+	 * @return: Another string[] containing only the first char of each name.
+	 */
 	private static String[] createCategories(String[] names)
 	{
 		//Variables
@@ -152,6 +171,12 @@ public class GradeEstimator {
 		//Return
 		return categories;
 	}
+	/**
+	 * Get's the scores from an input string that is formatted in the correct way. 
+	 * @param curr
+	 * @return
+	 * @throws GradeFileFormatException
+	 */
 	private static Score getScore(String curr) throws GradeFileFormatException
 	{
 		//Variables
@@ -162,12 +187,12 @@ public class GradeEstimator {
 		//Variables
 		
 		//Body
-		
 		//STEP 1. Find all of the variables in the string.
 		for(int i = 0; i < SCORE_PARAMS; i++)
 		{
 			scoreFields[i] = "";
 			
+			//Gets the string for the next parameter. 
 			//Set the check condition for curr length first, so then it won't do the next if it fails.
 			while(counter <= (curr.length() - 1) && (!Character.isWhitespace(curr.charAt(counter))) )
 			{
@@ -175,29 +200,36 @@ public class GradeEstimator {
 				scoreFields[i] += curr.charAt(counter);
 				counter++;
 			}
-			
-			//System.out.println(scoreFields[i]); //TEST
 			counter++;
 		}
 		
 		//Step 2. Parse out all of the doubles. 
 		try
 		{
-		pointsEarned = Double.parseDouble(scoreFields[1]);
-		maxPoints = Double.parseDouble(scoreFields[2]);
-		} catch(NumberFormatException e)
+			pointsEarned = Double.parseDouble(scoreFields[1]);
+			maxPoints = Double.parseDouble(scoreFields[2]);
+		} 
+		catch(NumberFormatException e)
 		{
-			throw new GradeFileFormatException();
+			//If these strings can't be parsed, it's not in the correct format. 
+			throw new GradeFileFormatException(); 
 		}
+		
 		//Step 3. Achieve nirvana and create the score. 
 		newScore = new Score(scoreFields[0], pointsEarned, maxPoints);
 		//Body
 		
 		//Return
 		return newScore;
-	
 	}
-	
+	/**
+	 * Tests if the method "getScores" works as expected.  The testers string
+	 * will be the test cases that will be iterated through. 
+	 * 
+	 * No data is manipulated. 
+	 * PRECONDITIONS: N/a
+	 * POSTCONDITIOINS: N/a
+	 */
 	private static void testGetScore()
 	{
 		String[] testers = {"a1 30 50", "a2 12.5 15", "a3 0 20"};
@@ -205,7 +237,7 @@ public class GradeEstimator {
 		for(int i = 0; i < testers.length; i++)
 		{
 			try {
-				getScore(testers[i]);
+				System.out.println(getScore(testers[i]));
 			} catch (GradeFileFormatException e) {
 				e.printStackTrace();
 			}
@@ -214,22 +246,34 @@ public class GradeEstimator {
 	/**
 	 * Separate the current string out into each individual name of the grade
 	 * by whitespace. 
+	 * 
 	 * PRECONDITIONS: curr contains each element separated by exactly one space. 
+	 * POSTCONDITIONS: A string[] that contains all the elements from curr is created. 
+	 * 
+	 * BUGS/IMPROVEMENTS: Creates an array the size of the amount of whitespaces.  This could
+	 * lead to a problem eventually, causing the array to be populated by nulls and possibly
+	 * causing nullPointers later on in code.  We could fix this by implementing a list, or 
+	 * calling an exception if the expected and actual size aren't equal. 
+	 * 
 	 * @param curr: A string containing names, separated by whitespace
 	 * @return an array of strings of each category name.
+	 * 
 	 */
 	private static String[] getNames(String curr)
 	{
 		//Variables
-		String[] names;
+		String[] names; 
 		String name = "";
 		int size, counter = 0;
 		//Variables
 		
 		//Body
+		//Step 1. Create the array that we will be adding to. 
+		curr += " "; //Adds a space at the end so there is at least one. 
 		size = countWhitespace(curr); //This will be the maxsize of the string[]
 		names = new String[size];
 		
+		//Step 2.
 		//Deconstruct the string into parts based upon spaces. 
 		//We allow for multiple whitespaces between each one. 
 		//The size of names will be the amount of whitespace
@@ -257,29 +301,37 @@ public class GradeEstimator {
 			}
 		}
 		//TODO use counter to create a new array then set current array to that if
-		//length becomes a problem.
+		//length becomes a problem, or call a gradeFormatException. 
 		//Body
 		
 		//Return
 		return names;
 	}
-	
+	/**
+	 * Tests if the method "getNames" works as expected.  The testers string
+	 * will be the test cases that will be iterated through. 
+	 * 
+	 * No data is manipulated. 
+	 * PRECONDITIONS: N/a
+	 * POSTCONDITIOINS: N/a
+	 */
 	private static void testGetNames()
 	{
 		//Variables
-		String[] names = {"ALPHA BETA GAMMA KAPPA", "OMEGA RUBY  SAPPHIRE   EMERALD  ", " HI  EK SO  OE W "};
+		String[] testers = {"ALPHA BETA GAMMA KAPPA", "OMEGA RUBY  SAPPHIRE   EMERALD  ", " HI  EK SO  OE W "};
 		//Variables
 		
 		//Body
-		for(int i = 0; i < names.length; i++)
+		for(int i = 0; i < testers.length; i++)
 		{			
-			getNames(names[i]);
+			getNames(testers[i]);
 		}
 		//Body
 	}
 	/**
 	 * Return a double array that contains a list of minimum thresholds,
 	 * by deleting whitespace and then looking through the String.
+	 * 
 	 * @param curr: a string that contains the thresholds of grades
 	 * @return an array of doubles with minimum thresholds. 
 	 * @throws GradeFileFormatException 
@@ -301,22 +353,21 @@ public class GradeEstimator {
 		{
 			nextSpace = curr.indexOf(' '); //Find where spaces are. 
 			
-			if(nextSpace != -1) //Nextspace returns -1 if there are no more. 
+			if(nextSpace != -1) //indexOf returns -1 if there are no more. 
 			{
 				minThreshold_ = curr.substring(0, nextSpace); 
-				
 				try
 				{
 					minThresholds[counter] = Double.parseDouble(minThreshold_);
 				}
 				catch(NumberFormatException e)
 				{
-					throw new GradeFileFormatException();
+					//If this can't be parsed throw an exception. 
+					throw new GradeFileFormatException(); 
 				}
 				
 				counter++; //Add one to the counter. 
 				curr = curr.substring(nextSpace + 1); //Reduce the size of the string. 
-				//System.out.println(minThreshold_ + " <-- minThreshold, curr --> " + curr); //TESTER
 			}
 		}
 		//Body
@@ -324,14 +375,25 @@ public class GradeEstimator {
 		//Return
 		return minThresholds;
 	}
+	/**
+	 * Tests if the method "getThresholds" works as expected.  The testers string
+	 * will be the test cases that will be iterated through. 
+	 * 
+	 * No data is manipulated. 
+	 * PRECONDITIONS: N/a
+	 * POSTCONDITIOINS: N/a
+	 */
 	private static void testGetThresholds()
 	{
-		String tester = "90.3 49.2 48.1";
+		String[] testers = {"90.3 49.2 48.1", "0.00, 3, 100"};
 		
-		try {
-			getThresholds(tester);
-		} catch (GradeFileFormatException e) {
-			e.printStackTrace();
+		for(int i = 0; i < testers.length; i++)
+		{
+			try {
+				getThresholds(testers[i]);
+			} catch (GradeFileFormatException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	/**
@@ -361,9 +423,11 @@ public class GradeEstimator {
 		return letterGrades;
 	}
 	/**
-	 * Tests to see if the method "getLetterGrades" works.
+	 * Tests if the method "getLetterGrades" works as expected.  
+	 * 
+	 * No data is manipulated. 
 	 * PRECONDITIONS: N/a
-	 * POSTCONDITIONS: N/a
+	 * POSTCONDITIOINS: N/a
 	 */
 	private static void testGetLetterGrades()
 	{
@@ -470,7 +534,6 @@ public class GradeEstimator {
 		
 		return blackspaceString;
 	}
-	
 	/**
 	 * Counts the amount of whitespace in a given string. 
 	 * @param input: A string that we want to figure out how much
@@ -496,7 +559,12 @@ public class GradeEstimator {
 		//Return
 		return count;
 	}
-	
+	/**
+	 * An easy way to read data from the object.  Could be the toString method, but
+	 * we weren't allowed to make public objects. 
+	 * 
+	 * @return A string that contains information all about the object. 
+	 */
 	private String read()
 	{
 		//Variables
@@ -513,7 +581,7 @@ public class GradeEstimator {
 			}
 			else
 			{
-				newString += "[" + (i+1) + "]: " + scoreList.get(i).toString() + " ";
+				newString += "\n[" + (i+1) + "]: " + scoreList.get(i).toString() + " ";
 			}
 		}
 		output += newString + "\n";
@@ -544,48 +612,19 @@ public class GradeEstimator {
 		{
 			newString += "[" + (i+1) + "]: " + letterGrades[i] + " ";
 		}
-		output += newString + "\n";
-		
-				
+		output += newString + "\n";	
 		//Body
 		
 		//Return
 		return output;
 	}
-	private static <E> String readArray(E[] data)
-	{
-		//Variables
-		String newString = "";
-		//Variables
-		
-		//Body
-		for(int i = 0; i < data.length; i++)
-		{
-			if(data==null)
-			{
-				//Do nothing
-			}
-			else
-			{
-				newString += "[" + (i+1) + "]: " + data[i].toString() + " ";
-			}
-		}
-		//Body
-		
-		//Return
-		return newString;
-	}
+	//Methods
+	
 	public static void main(String[] args) {
 		
-		//testGetLetterGrades();
-		//testGetNames();
-		//testGetScore();
-		//testGetThresholds();
 		try {
 			GradeEstimator ge = checkInput(args);
-			System.out.println(ge.read());
-		} catch (FileNotFoundException | GradeFileFormatException e) {
-			// 
+		} catch (FileNotFoundException | GradeFileFormatException e) { 
 			e.printStackTrace();
 		}
 	}
