@@ -129,7 +129,7 @@ public class GradeEstimator {
 				}
 				else //If it isn't, add that. 
 				{
-					currString = removeTrailing(currString);
+					currString = removeTrailing(currString);				
 					scoreList.add(getScore(currString));
 				}
 			}
@@ -164,7 +164,7 @@ public class GradeEstimator {
 		categories = new String[names.length];
 		for(int i = 0; i < names.length; i++)
 		{
-			categories[i] = names[i].charAt(i) + "";
+			categories[i] = names[i].charAt(0) + "";
 		}
 		//Body
 		

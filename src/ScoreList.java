@@ -72,13 +72,10 @@ public class ScoreList implements ScoreListADT{
 		if(s.equals(null)) throw new IllegalArgumentException();
 		
 		//Check to see if array is full
-		if(numItems == this.list.length) 
-			expandArray();
-		else
-		{
-			list[numItems] = s;
-			numItems++; //Add an item to the total.
-		}
+		if(numItems == this.list.length) expandArray();
+		
+		list[numItems] = s;
+		numItems++; //Add an item to the total.
 		
 	}
 	@Override
