@@ -90,10 +90,10 @@ public class GradeEstimator {
 		
 		//Body
 		try {
-			currString = bufferO.readLine(); //Get first String
+			currString = removeTrailing(bufferO.readLine()); //Get first String
 			letterGrades = getLetterGrades(currString);
 			
-			currString = bufferO.readLine(); //Second string
+			currString = removeTrailing(bufferO.readLine()); //Second string
 			minThresholds = getThresholds(currString);
 			
 			//Check to see if these contain the same # of elements
@@ -102,13 +102,13 @@ public class GradeEstimator {
 				throw new GradeFileFormatException(); //These are paired. 
 			}
 			
-			currString = bufferO.readLine(); //Third String
+			currString = removeTrailing(bufferO.readLine()); //Third String
 			names = getNames(currString);
 			
 			//Create the category from the scores. 
 			categories = createCategories(names);
 			
-			currString = bufferO.readLine(); //Value of each assignment
+			currString = removeTrailing(bufferO.readLine()); //Value of each assignment
 			assignmentValue_ = getThresholds(currString);
 			assignmentValue = new int[assignmentValue_.length];
 			for(int i = 0; i < assignmentValue.length; i++)
@@ -118,19 +118,19 @@ public class GradeEstimator {
 			
 			scoreList = new ScoreList();
 			
-			while(nextScore == true)
+			while(nextScore == true) //If it has a next score. 
 			{
 				currString = bufferO.readLine();
-				//System.out.println(currString + " | line 108");
+				//Get the string for the nextScore. 
 				
-				if(currString == (null))
+				if(currString == (null)) //Test to see if the current one is null
 				{
 					nextScore = false;
 				}
-				else
+				else //If it isn't, add that. 
 				{
+					currString = removeTrailing(currString);
 					scoreList.add(getScore(currString));
-					//System.out.println(getScore(currString).toString());
 				}
 			}
 		} 
@@ -507,6 +507,51 @@ public class GradeEstimator {
 		return result;
 	}
 	/**
+	 * Find where the #comment begins, remove all info after that, and 
+	 * remove all of the whitespace that comes before that. Iterating backwards
+	 * 
+	 * @param input: A string that may have a #comment in the formatting. 
+	 * @return A string without the #comment and no trailing whitespace. 
+	 */
+	private static String removeTrailing(String input)
+	{
+		//Variables
+		String output = input;
+		int markerLocation = (input.length() - 1);
+		boolean foundChar = false;
+		//Variables
+		
+		//Body
+		//Step 1. Identify the #
+		for(int i = 0; i < input.length(); i++)
+		{
+			if(input.charAt(i) == '#')
+			{
+				markerLocation = i;
+			}
+		}
+		
+		//Step 2. Remove all things after that point. 
+		output = input.substring(0, markerLocation); //(STRING)#COMMENT only string included. 
+		
+		//Step 3. Remove all whitespace trailing the actual data. 
+		for(int i = (output.length() - 1); i >= 0; i--)
+		{
+			if(Character.isWhitespace(output.charAt(i)))
+			{
+				output = output.substring(0, i);
+			}
+			else
+			{
+				break; //If it found a non-whitespace character, break out of loop. 
+			}
+		}
+		//Body
+		
+		//Return
+		return output;
+	}
+	/**
 	 * Remove the whitespace from an input. 
 	 * @param input a string that may or may not have excessive whitespace that needs to be removed. 
 	 * @return return the input with the whitespace removed. 
@@ -624,6 +669,7 @@ public class GradeEstimator {
 		
 		try {
 			GradeEstimator ge = checkInput(args);
+			System.out.println(ge.read());
 		} catch (FileNotFoundException | GradeFileFormatException e) { 
 			e.printStackTrace();
 		}
