@@ -19,6 +19,6 @@ public class GradeFileFormatException extends Exception
 	 */
 	public GradeFileFormatException(String message)
 	{
-		super(message);
+		System.out.println(message);
 	}
 }
