@@ -84,11 +84,11 @@ public class GradeEstimator
 			}
 			catch (FileNotFoundException e)
 			{
-				throw new FileNotFoundException();
+				throw new FileNotFoundException("dne (No such file or directory)");
 			}
 			catch (GradeFileFormatException e)
 			{
-				throw new GradeFileFormatException();
+				throw new GradeFileFormatException("GradeFileFormatException);
 			}
 		}
 	}
