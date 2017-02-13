@@ -88,7 +88,7 @@ public class GradeEstimator
 			}
 			catch (GradeFileFormatException e)
 			{
-				throw new GradeFileFormatException("GradeFileFormatException);
+				throw new GradeFileFormatException("GradeFileFormatException");
 			}
 		}
 	}
