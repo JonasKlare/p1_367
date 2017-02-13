@@ -104,15 +104,15 @@ public class GradeEstimator1
 		FileReader fr = new FileReader(f1);
 		BufferedReader bufferO = new BufferedReader(fr);
 		
-		// TODO
-		// Add comments on what each variable is for
-		String currString = "";
-		char[] letterGrades;
-		double[] minThresholds;
-		double[] tempAssignmentValue;
-		int[] assignmentValue;
-		String[] names, categories;
-		boolean nextScore = true;
+		//Keeps track of what the current string being looked at is
+		String currString = ""; 
+		char[] letterGrades; //A char[] holding letterGrades to pass to the constructor
+		double[] minThresholds; //A double[] holding the min value for that letterGrade
+		double[] tempAssignmentValue; //A intermediate assignment value array. 
+		int[] assignmentValue; //An int[] holding how much an assignment is worth. 
+		String[] names,  //A String[] of the names of each category. 
+			categories; //A string[] that has the first letter of each name. 
+		boolean nextScore = true; //Says if there is a next score. 
 		
 		ScoreList scoreList;
 		
@@ -332,9 +332,9 @@ public class GradeEstimator1
 	/**
 	 * Get's the scores from an input string that is formatted in the 
 	 * correct way. 
-	 * @param curr
-	 * @return
-	 * @throws GradeFileFormatException
+	 * @param curr: The current string that will have a score extracted. 
+	 * @return a new Score.
+	 * @throws GradeFileFormatException: If it can't create a score.
 	 */
 	private static Score getScore(String curr) throws GradeFileFormatException
 	{
