@@ -451,19 +451,25 @@ public class GradeEstimator
 	private static String removeTrailing(String input)
 	{
 		String output = input;
-		int markerLocation = (input.length() - 1);
+		// Tell whether # is found
+		boolean isFound = false;
+		int markerLocation = 0;
 	
 		//Step 1. Identify location of the #
 		for(int i = 0; i < input.length(); i++)
 		{
 			if(input.charAt(i) == '#')
 			{
+				isFound = true;
 				markerLocation = i;
 			}
 		}
 		
 		//Step 2. Remove all characters after #. 
-		output = input.substring(0, markerLocation);
+		if (isFound)
+		{
+			output = input.substring(0, markerLocation);
+		}
 		
 		//Step 3. Remove all whitespace at end of string. 
 		for(int i = (output.length() - 1); i >= 0; i--)
